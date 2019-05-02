@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>后台管理系统</title>
+    <!-- Essential styles -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"
+          type="text/css"/>
+    <link rel="stylesheet"
+          th:href="@{/plugins/font-awesome/css/font-awesome.css}"
+          type="text/css"/>
+
+    <!-- Dlapak styles -->
+    <link id="theme_style" type="text/css"
+          th:href="@{/css/style1.css}"
+          rel="stylesheet" media="screen"/>
+
+    <!-- Assets -->
+    <link rel="stylesheet"
+          th:href="@{/plugins/owl-carousel/owl.carousel.css}"/>
+    <link rel="stylesheet" th:href="@{/plugins/owl-carousel/owl.theme.css}"/>
+    <script th:src="@{/js/jquery.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/echarts.min.js}"></script>
+    <script th:src="@{/bootstrap-table/bootstrap-table.js}"></script>
+    <link th:href="@{/bootstrap-table/bootstrap-table.css}" rel="stylesheet" />
+    <script th:src="@{/bootstrap-table/bootstrap-table-zh-CN.js}"></script>
+
+
+    <style type="text/css">
+        .sidebar {
+            margin-left: 30px;
+            margin-top: 20px;
+            font-size: 20px;
+            color: green;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+        .sidebar-button{
+            background-color: green;
+            color: white;
+            width: 90%;
+            height: 40px;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+<div style="position: absolute; height: 100%; width: 100%;">
+    <div class="row" style="background-color: green; height: 150px;">
+        <div class="col-md-6" style="margin-left: 100px; margin-top: 50px;">
+            <span style="font-size: 50px; color: white;">后台管理系统</span>
+        </div>
+
+    </div>
+    <div class="row" style="height: 100%; background: #D4D4D4;">
+        <div class="col-md-2">
+            <div class="sidebar">
+                <a href="#">
+                    <button class="sidebar-button"><i class="fa fa-caret-square-o-right"></i>&nbsp;&nbsp;菜品管理</button>
+                </a>
+            </div>
+            <div class="sidebar">
+                <a href="/manager/managerUser">
+                    <button class="sidebar-button" >
+                        <i class="fa fa-caret-square-o-right"></i>&nbsp;&nbsp;用户管理
+                    </button>
+                </a>
+            </div>
+            <div class="sidebar">
+                <a href="/manager/managerAppoint">
+                    <button class="sidebar-button"><i class="fa fa-caret-square-o-right"></i>&nbsp;&nbsp;预定管理</button>
+                </a>
+            </div>
+            <div class="sidebar">
+                <a href="/manager/managerAnnounce">
+                    <button class="sidebar-button"><i class="fa fa-caret-square-o-right"></i>&nbsp;&nbsp;公告管理</button>
+                </a>
+            </div>
+
+            <div class="sidebar">
+                <a href="/manager/managerHotType">
+                    <button class="sidebar-button"><i class="fa fa-caret-square-o-right"></i>&nbsp;&nbsp;热门管理</button>
+                </a>
+            </div>
+
+        </div>
+
+
+
+
+        <div class="col-md-10" style="height: 100%; background: #FAFAFA;">
+            <div class="sidebar">查看图表</div>
+            <div id="chart" style="width:1000px;height:600px;"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    var t = [];
+    var t1 = [];
+    var t2 = [];
+    var t3 = [];
+    var t4 = [];
+    $(function(){
+        var that = this;
+        $.ajax({
+            type:'POST',
+            url:'/manager/showECharts',
+            dataType: 'JSON',
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function(data){
+                console.log(data);
+                t = data.t;
+                t1 = data.t1;
+                t2 = data.t2;
+                t3 = data.t3;
+                t4 = data.t4;
+                buildChart();
+            }
+        });
+    });
+    function buildChart(){
+        var myChart = echarts.init(document.getElementById('chart'));
+        var option = {
+            title : {
+                text: '近12月份食品预订记录'
+            },
+            tooltip : {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['荤菜','素菜','小吃','面点']
+            },
+            toolbox: {
+                show : true,
+                feature : {
+                    mark : {show: true},
+                    dataView : {show: true, readOnly: false},
+                    magicType : {show: true, type: ['line', 'bar']},
+                    restore : {show: true},
+                    saveAsImage : {show: true}
+                }
+            },
+            calculable : true,
+            xAxis : [
+                {
+                    type : 'category',
+                    data : t
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            series : [
+                {
+                    name:'荤菜',
+                    type:'bar',
+                    data:t1,
+                    markPoint : {
+                        data : [
+                            {type : 'max', name: '最大值'},
+                            {type : 'min', name: '最小值'}
+                        ]
+                    },
+                    markLine : {
+                        data : [
+                            {type : 'average', name: '平均值'}
+                        ]
+                    }
+                },
+                {
+                    name:'素菜',
+                    type:'bar',
+                    data:t2,
+                    markPoint : {
+                        data : [
+                            {name : '年最高', value : 182.2, xAxis: 7, yAxis: 183, symbolSize:18},
+                            {name : '年最低', value : 2.3, xAxis: 11, yAxis: 3}
+                        ]
+                    },
+                    markLine : {
+                        data : [
+                            {type : 'average', name : '平均值'}
+                        ]
+                    }
+                }
+                ,
+                {
+                    name:'小吃',
+                    type:'bar',
+                    data:t3,
+                    markPoint : {
+                        data : [
+                            {name : '年最高', value : 182.2, xAxis: 7, yAxis: 183, symbolSize:18},
+                            {name : '年最低', value : 2.3, xAxis: 11, yAxis: 3}
+                        ]
+                    },
+                    markLine : {
+                        data : [
+                            {type : 'average', name : '平均值'}
+                        ]
+                    }
+                }
+                ,
+                {
+                    name:'面点',
+                    type:'bar',
+                    data:t4,
+                    markPoint : {
+                        data : [
+                            {name : '年最高', value : 182.2, xAxis: 7, yAxis: 183, symbolSize:18},
+                            {name : '年最低', value : 2.3, xAxis: 11, yAxis: 3}
+                        ]
+                    },
+                    markLine : {
+                        data : [
+                            {type : 'average', name : '平均值'}
+                        ]
+                    }
+                }
+            ]
+        };
+        myChart.setOption(option);
+    }
+
+
+    /*]]>*/
+</script>
+</body>
+</html>
